@@ -1,0 +1,16 @@
+##
+## docker build -t ideahut-springboot-3x-template . -f Dockerfile-native
+## docker run --name ideahut-springboot-3x-template -p 5401:5401 ideahut-springboot-3x-template
+## docker run --name ideahut-springboot-3x-template --rm -it ideahut-springboot-3x-template /bin/sh
+##
+FROM bellsoft/liberica-native-image-kit-container:jdk-17-nik-22.3-stream-musl as builder
+WORKDIR /build
+ADD . /build
+RUN mv /build/maven / 
+#RUN cd /build && /maven/bin/mvn clean && /maven/bin/mvn -Pnative native:compile
+#RUN cd /build/target && ls -all
+
+#FROM bellsoft/alpaquita-linux-base:stream-musl
+#WORKDIR /
+#COPY --from=0 /build/target/ideahut-springboot-3x-template .
+#CMD ["/ideahut-springboot-3x-template"]
