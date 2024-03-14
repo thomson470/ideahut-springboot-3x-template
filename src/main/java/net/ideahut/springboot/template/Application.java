@@ -88,7 +88,7 @@ public class Application extends SpringBootServletInitializer implements Applica
 			log.info("**** Spring Boot      : " + SpringBootVersion.getVersion());
 			log.info("**** Hibernate        : " + Version.getVersionString());
 			log.info("**** Ideahut          : " + IdeahutVersion.getVersion());
-			log.info("**** Application '" + appProperties.getInstanceId() + "' is ready to serve on port " + webServerApplicationContext.getWebServer().getPort());
+			log.info("**** Application '" + webServerApplicationContext.getId() + "' is ready to serve on port " + webServerApplicationContext.getWebServer().getPort());
 			
 		});
 	}

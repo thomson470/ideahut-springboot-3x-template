@@ -15,12 +15,14 @@
 		Daftar versi springboot yang tersedia
 	-->
 	
+	<!--
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.1.6</version>
 		<relativePath/>
 	</parent>
+	-->
 	
 	<!--
 	<parent>
@@ -31,14 +33,12 @@
 	</parent>
 	-->
 	
-	<!--
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.2.2</version>
 		<relativePath/>
 	</parent>
-	-->
 
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
@@ -53,7 +53,6 @@
         <version.mysql-connector-java>8.0.33</version.mysql-connector-java>
         <version.springdoc-openapi>2.3.0</version.springdoc-openapi>
         <version.jbcrypt>0.4</version.jbcrypt>
-        
         <version.jakarta.mail>2.0.1</version.jakarta.mail>
         <version.jasperreports>6.21.0</version.jasperreports>
 		<version.jedis>5.0.2</version.jedis>
@@ -67,9 +66,9 @@
 		<!-- IDEAHUT -->
 		<dependency>
 			<groupId>net.ideahut</groupId>
-			<artifactId>ideahut-springboot-3.1.6</artifactId>
+			<!--<artifactId>ideahut-springboot-3.1.6</artifactId>-->
 			<!--<artifactId>ideahut-springboot-3.2.1</artifactId>-->
-			<!--<artifactId>ideahut-springboot-3.2.2</artifactId>-->
+			<artifactId>ideahut-springboot-3.2.2</artifactId>
 			<version>0.0.3</version>
 		</dependency>
 
@@ -78,25 +77,24 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<!--
 			<exclusions>
 		        <exclusion>
 		            <groupId>org.springframework.boot</groupId>
 		            <artifactId>spring-boot-starter-tomcat</artifactId>
 		        </exclusion>
 		    </exclusions>
-		    -->
 		</dependency>
 		<!--
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-jetty</artifactId>
 		</dependency>
+		-->
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-undertow</artifactId>
 		</dependency>
-		-->
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -200,7 +198,6 @@
 		    <groupId>org.mindrot</groupId>
 		    <artifactId>jbcrypt</artifactId>
 		    <version>${version.jbcrypt}</version>
-		    <optional>true</optional>
 		</dependency>
 
 
