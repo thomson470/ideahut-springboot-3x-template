@@ -8,29 +8,29 @@ import org.springframework.context.annotation.Primary;
 import net.ideahut.springboot.task.TaskHandler;
 import net.ideahut.springboot.task.TaskHandlerImpl;
 import net.ideahut.springboot.template.AppConstants;
-import net.ideahut.springboot.template.AppProperties;
+import net.ideahut.springboot.template.properties.AppProperties;
 
 /*
  * Konfigurasi TaskHandler
  * Untuk proses asynchronous
  */
 @Configuration
-class AsyncConfig {
+class TaskConfig {
 	
 	@Autowired
 	private AppProperties appProperties;
 	
 	@Primary
-	@Bean(name = AppConstants.Bean.Async.COMMON, destroyMethod = "shutdown")
-    protected TaskHandler commonAsync() {
+	@Bean(name = AppConstants.Bean.Task.COMMON, destroyMethod = "shutdown")
+    protected TaskHandler commonTask() {
 		return new TaskHandlerImpl()
-		.setTaskProperties(appProperties.getAsync().getCommon());
+		.setTaskProperties(appProperties.getTask().getCommon());
     }
 	
-	@Bean(name = AppConstants.Bean.Async.AUDIT, destroyMethod = "shutdown")
-	protected TaskHandler auditAsync() {
+	@Bean(name = AppConstants.Bean.Task.AUDIT, destroyMethod = "shutdown")
+	protected TaskHandler auditTask() {
 		return new TaskHandlerImpl()
-		.setTaskProperties(appProperties.getAsync().getAudit());
+		.setTaskProperties(appProperties.getTask().getAudit());
     }
 	
 }

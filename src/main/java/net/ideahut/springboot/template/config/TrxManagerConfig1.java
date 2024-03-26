@@ -27,28 +27,25 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import jakarta.persistence.EntityManagerFactory;
-import net.ideahut.springboot.entity.EntityAnnotationIntrospector;
-import net.ideahut.springboot.entity.EntityTrxManager;
-import net.ideahut.springboot.entity.EntityTrxManagerImpl;
-import net.ideahut.springboot.mapper.DataMapper;
-import net.ideahut.springboot.mapper.DataMapperImpl;
 import net.ideahut.springboot.template.AppConstants;
-import net.ideahut.springboot.template.AppProperties;
-import net.ideahut.springboot.template.AppProperties.Audit;
-import net.ideahut.springboot.template.entity.EntityFill;
+import net.ideahut.springboot.template.properties.AppProperties;
+import net.ideahut.springboot.template.properties.AppProperties.Audit;
 import net.ideahut.springboot.util.FrameworkUtil;
 
+/*
+ * Konfigurasi Primary Transaction Manager & Entity Manager
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories
 (
-	entityManagerFactoryRef = AppConstants.Bean.ENTITY_MANAGER_FACTORY,
-	transactionManagerRef = AppConstants.Bean.TRANSACTION_MANAGER,
+	entityManagerFactoryRef = "entityManagerFactory_1",
+	transactionManagerRef = "transactionManager_1",
 	basePackages = {
-		"net.ideahut.springboot.template.repo"
+		AppConstants.PACKAGE + ".repo"
 	}
 )
-class TrxManagerConfig {
+class TrxManagerConfig1 {
 	
 	@Autowired
 	private Environment environment;	
@@ -57,7 +54,7 @@ class TrxManagerConfig {
 	
 
 	@Primary
-	@Bean(name = AppConstants.Bean.DATA_SOURCE)
+	@Bean(name = "dataSource_1")
 	@ConfigurationProperties(prefix = "spring.datasource")
 	protected DataSource dataSource() {
 		String jndi = environment.getProperty("spring.datasource.jndi-name", "").trim();
@@ -70,38 +67,36 @@ class TrxManagerConfig {
     }
 	
 	// https://docs.spring.io/spring-framework/reference/core/aot.html#aot.bestpractices.jpa
-	@Bean(name = AppConstants.Bean.PERSISTENCE_MANAGED_TYPES)
+	@Bean(name = "persistenceManagedTypes_1")
 	protected PersistenceManagedTypes persistenceManagedTypes(
 		ResourceLoader resourceLoader
 	) {
 		return 
 		new PersistenceManagedTypesScanner(resourceLoader)
 		.scan(
-			EntityFill.class.getPackageName()
+			AppConstants.PACKAGE + ".entity"
 		);
 	}
 	
 	@Primary
-	@Bean(name = AppConstants.Bean.ENTITY_MANAGER_FACTORY)
+	@Bean(name = "entityManagerFactory_1")
 	protected LocalContainerEntityManagerFactoryBean entityManagerFactory(
 		EntityManagerFactoryBuilder builder,
-		@Qualifier(AppConstants.Bean.PERSISTENCE_MANAGED_TYPES) PersistenceManagedTypes persistenceManagedTypes,
-		@Qualifier(AppConstants.Bean.DATA_SOURCE) DataSource dataSource,
-		@Qualifier(AppConstants.Bean.Audit.SESSION_FACTORY) SessionFactory auditSessionFactory
+		@Qualifier("persistenceManagedTypes_1") PersistenceManagedTypes persistenceManagedTypes,
+		@Qualifier("dataSource_1") DataSource dataSource,
+		@Qualifier("auditSessionFactory_1") SessionFactory auditSessionFactory
 	) {
-		Map<String, Object> properties = FrameworkUtil.getHibernateProperties(environment, "spring.jpa.properties");
+		Map<String, Object> properties = FrameworkUtil.getHibernateSettings(environment, "spring.jpa.properties");
 		/*
 		 * Session Factory audit dapat di-set disini
 		 * atau bisa juga di application.properties / application.yml di property:
 		 * - "spring.jpa.properties.hibernate.audit_identifier": audit id yang digunakan agar terhubung dengan AuditHandler, contoh: spring_sample
 		 * - "spring.jpa.properties.hibernate.audit_bean_name": nama bean audit session factory, contoh: auditSessionFactory
+		 * 
+		 * EntityIntegrator.setAuditSessionFactory("spring_sample", properties, auditSessionFactory);
 		 */
-		//EntityIntegrator.setAuditSessionFactory("spring_sample", properties, auditSessionFactory);
 		return builder
-			.dataSource(dataSource)
-			//.packages(
-			//	EntityFill.class.getPackageName()
-			//)			
+			.dataSource(dataSource)		
 			.persistenceUnit("default")
 			.managedTypes(persistenceManagedTypes)
 			.properties(properties)			
@@ -109,63 +104,14 @@ class TrxManagerConfig {
 	}
 
 	@Primary
-	@Bean(name = AppConstants.Bean.TRANSACTION_MANAGER)
+	@Bean(name = "transactionManager_1")
 	protected PlatformTransactionManager transactionManager(
-		@Qualifier(AppConstants.Bean.ENTITY_MANAGER_FACTORY) EntityManagerFactory entityManagerFactory
+		@Qualifier("entityManagerFactory_1") EntityManagerFactory entityManagerFactory
 	) {
 		return new JpaTransactionManager(entityManagerFactory);
 	}
 	
-	
-	
-	/*
-	 * CONTOH TRX MANAGER / DATABASE LAIN
-	 */
-	/*
-	@Bean("otherrEmf")
-	public LocalContainerEntityManagerFactoryBean otherDbEMF(
-		EntityManagerFactoryBuilder builder, 
-		@Qualifier("otherDb") DataSource dataSource,
-		@Qualifier(AppConstants.Bean.Audit.SESSION_FACTORY) SessionFactory auditSessionFactory
-	) {
-		Map<String, Object> properties = BeanUtil.getHibernateProperties(environment, "app.other-db.jpa.properties");
-		EntityIntegrator.setAuditSessionFactory("spring_sample_2", properties, auditSessionFactory);
-		return builder
-			.dataSource(dataSource)
-			.packages(
-				"net.ideahut.springboot.sample.otherdb.entity"
-			)			
-			.persistenceUnit("default")
-			.properties(properties)			
-			.build();
-	}
-	@Bean("otherDb")
-	public DataSource otherDb() {
-		Database other = appProperties.getOtherDb();
-		String jndi = other.getDatasource().getJndiName();
-		jndi = jndi != null ? jndi.trim() : "";
-		if (jndi.length() != 0) {
-			JndiDataSourceLookup lookup = new JndiDataSourceLookup();
-			return lookup.getDataSource(jndi);
-		} else {
-			return DataSourceBuilder.create()
-			.driverClassName(other.getDatasource().getDriverClassName())
-			.url(other.getDatasource().getJdbcUrl())
-			.username(other.getDatasource().getUsername())
-			.password(other.getDatasource().getPassword())
-			.build();
-		}
-    }
-	@Bean(name = "otherManager")
-	public PlatformTransactionManager othrTransactionManager(
-		@Qualifier("otherrEmf") EntityManagerFactory entityManagerFactory
-	) {
-		return new JpaTransactionManager(entityManagerFactory);
-	}
-	*/
-	
-	
-	@Bean(name = AppConstants.Bean.Audit.DATA_SOURCE)
+	@Bean(name = "auditDatasource_1")
 	protected DataSource auditDatasource() {
 		Audit audit = appProperties.getAudit();
 		String jndi = audit.getDatasource().getJndiName();
@@ -183,35 +129,17 @@ class TrxManagerConfig {
 		}
     }	
 	
-	@Bean(name = AppConstants.Bean.Audit.SESSION_FACTORY)
+	@Bean(name = "auditSessionFactory_1")
 	protected LocalSessionFactoryBean auditSessionFactory(
-		@Qualifier(AppConstants.Bean.Audit.DATA_SOURCE) DataSource datasource
+		@Qualifier("auditDatasource_1") DataSource datasource
 	) {
 		Audit audit = appProperties.getAudit();
-		Map<String, String> jpaProps = audit.getJpa().getProperties();
-		Properties properties = new Properties();
-		for (Map.Entry<String, String> entry : jpaProps.entrySet()) {
-			if (entry.getKey().startsWith("hibernate.")) {
-				properties.put(entry.getKey(), entry.getValue());
-			}
-		}
+		Properties properties = FrameworkUtil.getHibernateProperties(audit.getJpa().getProperties());
 		LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(datasource);
         sessionFactory.setHibernateProperties(properties);
         sessionFactory.setEntityInterceptor(null);
         return sessionFactory;
 	}
-	
-	@Bean(name = AppConstants.Bean.DATA_MAPPER)
-	protected DataMapper dataMapper() {
-		return new DataMapperImpl()
-		.setIntrospector(new EntityAnnotationIntrospector());
-	}
-	
-	@Bean(name = AppConstants.Bean.ENTITY_TRX_MANAGER)
-	protected EntityTrxManager entityTrxManager() {
-		return new EntityTrxManagerImpl();
-	}
-	
 	
 }

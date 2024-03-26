@@ -1,4 +1,4 @@
-package net.ideahut.springboot.template;
+package net.ideahut.springboot.template.properties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +17,9 @@ import net.ideahut.springboot.mail.MailProperties;
 import net.ideahut.springboot.redis.RedisProperties;
 import net.ideahut.springboot.task.TaskProperties;
 
+/*
+ * Class properties yang definisinya sama dengan application.yml
+ */
 @Configuration
 @ConfigurationProperties(prefix = "app")
 @Setter
@@ -26,15 +29,18 @@ public class AppProperties {
 	private String instanceId;
 	private Boolean loggingError;
 	private String gridLocation;
-	private Database otherDb = new Database();
-	private Audit audit = new Audit();
+	private String messagePath;
+	private String reportPath;
+	
 	private Map<String, String> cors = new HashMap<>();
-	private Async async = new Async();
 	private List<Class<?>> ignoredHandlerClasses = new ArrayList<>();
 	
-	private RedisProperties redis = new RedisProperties();
 	private MailProperties mail = new MailProperties();
+	private Audit audit = new Audit();
+	private Task task = new Task();
+	private Redis redis = new Redis();
 	private Cache cache = new Cache();
+	//private TrxManager trxManager = new TrxManager();
 	private Admin admin = new Admin();
 	
 	
@@ -76,7 +82,13 @@ public class AppProperties {
 	
 	@Setter
 	@Getter
-	public static class Async {
+	public static class Redis {
+		private RedisProperties common 	= new RedisProperties();
+	}
+	
+	@Setter
+	@Getter
+	public static class Task {
 		private TaskProperties common 	= new TaskProperties();
 		private TaskProperties audit 	= new TaskProperties();
 	}
